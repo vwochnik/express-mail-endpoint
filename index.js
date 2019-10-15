@@ -14,15 +14,16 @@ app.use(cors({ origin: '*', optionsSuccessStatus: 200 }));
 
 const transport = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: !!process.env.SMTP_SECURE,
+  port: parseInt(process.env.SMTP_PORT),
+  secure: !!parseInt(process.env.SMTP_SECURE),
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
   }
 });
 
-const from = process.env.FROM_EMAIL;
+const from = process.env.FROM_EMAIL,
+      to = process.env.TO_EMAIL;
 
 app.post('/mail', [
   check('name').isLength({ min: 5 }),
@@ -37,21 +38,19 @@ app.post('/mail', [
   const { name, email, subject, message } = req.body;
 
   const mail = {
-    from: from,
+    from,
     to: 'v.wochnik@protonmail.com',
     subject: subject, // Subject line
     html: `<h1>${subject}</h1><p>${message}</p>`
   };
-  console.info(mail);
 
-  transport.sendMail(mail, function (err, info) {
-    if(err)
-      console.log(err)
-    else
-      console.log(info);
+  transport.sendMail(mail, function(err, info) {
+    if (err) {
+      return res.status(500).json({ errors: [err.response] });
+    }
+
+    res.json({ success: true });
   });
-
-  return res.json({});
 });
 
 app.listen(port, function () {
