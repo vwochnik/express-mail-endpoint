@@ -1,52 +1,57 @@
 const fs = require('fs'),
       path = require('path'),
       express = require('express'),
+      nodemailer = require('nodemailer'),
       cors = require('cors'),
       bodyParser = require('body-parser');
-
-const schemas = [
-  { id: 'product-list', name: 'Product List'},
-  { id: 'recommendations', name: 'Recommendations'}
-];
+const { check, validationResult } = require('express-validator');
 
 const port = process.env.PORT || 8080;
 
 const app = express();
-app.use(bodyParser());
+app.use(bodyParser.json());
+app.use(cors({ origin: '*', optionsSuccessStatus: 200 }));
 
-app.use(cors({
-  origin: '*',
-  optionsSuccessStatus: 200
-}));
-
-app.get('/schema/', (req, res) => {
-  return res.json(schemas);
+const transport = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: !!process.env.SMTP_SECURE,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
 });
 
-app.get('/schema/:name', (req, res) => {
-  const schemaName = req.params.name,
-        fileName = path.join('schema', `${schemaName}.json`);
+const from = process.env.FROM_EMAIL;
 
-  if (!fs.existsSync(fileName)) {
-    return res.status(404).send('Not found');
+app.post('/mail', [
+  check('name').isLength({ min: 5 }),
+  check('email').isEmail(),
+  check('message').isLength({ min: 10 })
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array().map(e => `${e.msg} for ${e.param}`) });
   }
 
-  const obj = JSON.parse(fs.readFileSync(fileName, 'utf8'));
-  return res.json(obj);
-});
+  const { name, email, subject, message } = req.body;
 
-app.post('/output/', (req, res) => {
-  const config = req.body;
+  const mail = {
+    from: from,
+    to: 'v.wochnik@protonmail.com',
+    subject: subject, // Subject line
+    html: `<h1>${subject}</h1><p>${message}</p>`
+  };
+  console.info(mail);
 
-  const out = Object.keys(config.Endpoints)
-    .map(endpoint => {
-      return {
-        Endpoint: endpoint,
-        Fields: JSON.parse(fs.readFileSync('output.json', 'utf8'))
-      };
-    });
+  transport.sendMail(mail, function (err, info) {
+    if(err)
+      console.log(err)
+    else
+      console.log(info);
+  });
 
-  return res.json(out);
+  return res.json({});
 });
 
 app.listen(port, function () {
