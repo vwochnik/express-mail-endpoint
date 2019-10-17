@@ -9,26 +9,23 @@ const { check, validationResult } = require('express-validator');
 
 const html = (s) => '<p>' + s.replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>") + '</p>';
 
-const port = process.env.PORT || 8080;
+const from = process.env.FROM_EMAIL,
+      to = process.env.TO_EMAIL,
+      port = process.env.PORT || 8080;
+
+const transport = nodemailer.createTransport(process.env.SMTP);
+const dots = dot.process({ path: "./views"});
 
 const app = express();
 app.use(bodyParser.json());
 app.use(cors({ origin: process.env.CORS_ORIGIN, optionsSuccessStatus: 200 }));
 
-const transport = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT),
-  secure: !!parseInt(process.env.SMTP_SECURE),
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+transport.verify(function(err) {
+  if (err) {
+    process.stdout.write("Could not verify SMTP server.\n");
+    process.exit(1);
   }
 });
-
-const dots = dot.process({ path: "./views"});
-
-const from = process.env.FROM_EMAIL,
-      to = process.env.TO_EMAIL;
 
 app.post('/mail', [
   check('name').isLength({ min: 5 }),
@@ -41,7 +38,6 @@ app.post('/mail', [
   }
 
   const { name, email, subject, message } = req.body;
-
   const sent = (new Date()).toGMTString();
 
   const mail = {
