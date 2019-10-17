@@ -12,6 +12,7 @@ const html = (s) => '<p>' + s.replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>
 
 const from = process.env.FROM_EMAIL,
       to = process.env.TO_EMAIL,
+      origins = process.env.CORS.split(/,\s*/);
       port = process.env.PORT || 8080;
 
 const transport = nodemailer.createTransport(process.env.SMTP);
@@ -19,7 +20,16 @@ const dots = dot.process({ path: "./views"});
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors({ origin: process.env.CORS_ORIGIN, optionsSuccessStatus: 200 }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (origins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  optionsSuccessStatus: 200
+}));
 
 transport.verify(function(err) {
   if (err) {
