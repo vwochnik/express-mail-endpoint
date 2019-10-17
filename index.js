@@ -4,6 +4,7 @@ const fs = require('fs'),
       nodemailer = require('nodemailer'),
       cors = require('cors'),
       bodyParser = require('body-parser'),
+      rateLimit = require('express-rate-limit');
       dot = require('dot');
 const { check, validationResult } = require('express-validator');
 
@@ -27,6 +28,7 @@ transport.verify(function(err) {
   }
 });
 
+app.use('/mail', rateLimit({ windowMs: 3600000, max: 5, message: { errors: ['Too many requests.'] } }));
 app.post('/mail', [
   check('name').isLength({ min: 5 }),
   check('email').isEmail(),
