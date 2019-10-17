@@ -1,0 +1,7 @@
+<h1>New Message</h1>
+<p>You have received a new message via your contact form.</p>
+<p>Name: {{=it.name}}<br>
+E-Mail: {{=it.email}}<br>
+Subject: {{=it.subject}}<br>
+Date: {{=it.sent}}</p>
+{{=it.message}}

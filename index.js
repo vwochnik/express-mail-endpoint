@@ -3,14 +3,17 @@ const fs = require('fs'),
       express = require('express'),
       nodemailer = require('nodemailer'),
       cors = require('cors'),
-      bodyParser = require('body-parser');
+      bodyParser = require('body-parser'),
+      dot = require('dot');
 const { check, validationResult } = require('express-validator');
+
+const html = (s) => '<p>' + s.replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>") + '</p>';
 
 const port = process.env.PORT || 8080;
 
 const app = express();
 app.use(bodyParser.json());
-app.use(cors({ origin: '*', optionsSuccessStatus: 200 }));
+app.use(cors({ origin: process.env.CORS_ORIGIN, optionsSuccessStatus: 200 }));
 
 const transport = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -21,6 +24,8 @@ const transport = nodemailer.createTransport({
     pass: process.env.SMTP_PASS
   }
 });
+
+const dots = dot.process({ path: "./views"});
 
 const from = process.env.FROM_EMAIL,
       to = process.env.TO_EMAIL;
@@ -37,11 +42,14 @@ app.post('/mail', [
 
   const { name, email, subject, message } = req.body;
 
+  const sent = (new Date()).toGMTString();
+
   const mail = {
-    from,
-    to: 'v.wochnik@protonmail.com',
-    subject: subject, // Subject line
-    html: `<h1>${subject}</h1><p>${message}</p>`
+    from, to,
+    replyTo: email,
+    subject: subject,
+    text: dots.text({ name, email, subject, message: message, sent }),
+    html: dots.html({ name, email, subject, message: html(message), sent })
   };
 
   transport.sendMail(mail, function(err, info) {
