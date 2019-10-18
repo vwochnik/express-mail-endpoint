@@ -2,6 +2,7 @@ const fs = require('fs'),
       path = require('path'),
       express = require('express'),
       nodemailer = require('nodemailer'),
+      dns = require('dns'),
       cors = require('cors'),
       bodyParser = require('body-parser'),
       rateLimit = require('express-rate-limit');
@@ -46,26 +47,34 @@ app.post('/mail', [
 ], (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array().map(e => `${e.msg} for ${e.param}`) });
+    return res.status(422).json({ errors: errors.array().map(e => `${e.msg} for ${e.param}.`) });
   }
 
   const { name, email, subject, message } = req.body;
   const sent = (new Date()).toGMTString();
 
-  const mail = {
-    from, to,
-    replyTo: email,
-    subject: subject,
-    text: dots.text({ name, email, subject, message: message, sent }),
-    html: dots.html({ name, email, subject, message: html(message), sent })
-  };
+  const [, host] = email.split('@');
 
-  transport.sendMail(mail, function(err, info) {
-    if (err) {
-      return res.status(500).json({ errors: [err.response] });
+  dns.resolveMx(host, (err, mx) => {
+    if ((err) || (!mx) || (!mx.some(x => (!!x.exchange)))) {
+      return res.status(500).json({ errors: ['Invalid email address.'] });
     }
 
-    res.json({ success: true });
+    const mail = {
+      from, to,
+      replyTo: email,
+      subject: subject,
+      text: dots.text({ name, email, subject, message: message, sent }),
+      html: dots.html({ name, email, subject, message: html(message), sent })
+    };
+
+    transport.sendMail(mail, (err, info) => {
+      if (err) {
+        return res.status(500).json({ errors: [err.response] });
+      }
+
+      res.json({ success: true });
+    });
   });
 });
 
