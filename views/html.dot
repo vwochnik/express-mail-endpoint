@@ -3,5 +3,7 @@
 <p>Name: {{=it.name}}<br>
 E-Mail: {{=it.email}}<br>
 Subject: {{=it.subject}}<br>
-Date: {{=it.sent}}</p>
+Date: {{=it.sent}}<br>
+User Agent: {{=it.agent}}<br>
+IP Address: {{=it.ip}}</p>
 {{=it.message}}

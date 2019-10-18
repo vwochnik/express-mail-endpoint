@@ -6,5 +6,7 @@ Name: {{=it.name}}
 E-Mail: {{=it.email}}
 Subject: {{=it.subject}}
 Date: {{=it.sent}}
+User Agent: {{=it.agent}}
+IP Address: {{=it.ip}}
 
 {{=it.message}}

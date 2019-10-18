@@ -10,6 +10,14 @@ const fs = require('fs'),
 const { check, validationResult } = require('express-validator');
 
 const html = (s) => '<p>' + s.replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>") + '</p>';
+const ipaddr = (req) => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) {
+    return forwarded.split(/,\s*/).pop();
+  } else {
+    return req.connection.remoteAddress;
+  }
+};
 
 const from = process.env.FROM_EMAIL,
       to = process.env.TO_EMAIL,
@@ -52,6 +60,8 @@ app.post('/mail', [
 
   const { name, email, subject, message } = req.body;
   const sent = (new Date()).toGMTString();
+  const agent = req.headers['user-agent'];
+  const ip = ipaddr(req);
 
   const [, host] = email.split('@');
 
@@ -64,8 +74,8 @@ app.post('/mail', [
       from, to,
       replyTo: email,
       subject: subject,
-      text: dots.text({ name, email, subject, message: message, sent }),
-      html: dots.html({ name, email, subject, message: html(message), sent })
+      text: dots.text({ name, email, subject, message: message, sent, agent, ip }),
+      html: dots.html({ name, email, subject, message: html(message), sent, agent, ip })
     };
 
     transport.sendMail(mail, (err, info) => {
