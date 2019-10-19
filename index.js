@@ -6,8 +6,8 @@ const fs = require('fs'),
       cors = require('cors'),
       bodyParser = require('body-parser'),
       rateLimit = require('express-rate-limit');
+      Joi = require('@hapi/joi'),
       dot = require('dot');
-const { check, validationResult } = require('express-validator');
 
 const html = (s) => '<p>' + s.replace(/\n{2,}/g, "</p><p>").replace(/\n/g, "<br>") + '</p>';
 const ipaddr = (req) => {
@@ -47,15 +47,18 @@ transport.verify(function(err) {
   }
 });
 
+const schema = Joi.object({
+    name: Joi.string().min(5).max(30).required(),
+    email: Joi.string().email({ minDomainSegments: 2 }).required(),
+    subject: Joi.string().min(5).max(60).required(),
+    message: Joi.string().min(5).required()
+}).strict();
+
 app.use('/mail', rateLimit({ windowMs: 3600000, max: 5, message: { errors: ['Too many requests.'] } }));
-app.post('/mail', [
-  check('name').isLength({ min: 5 }),
-  check('email').isEmail(),
-  check('message').isLength({ min: 10 })
-], (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array().map(e => `${e.msg} for ${e.param}.`) });
+app.post('/mail', (req, res) => {
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(500).json({ error: error.details[0].message + '.' });
   }
 
   const { name, email, subject, message } = req.body;
@@ -67,7 +70,7 @@ app.post('/mail', [
 
   dns.resolveMx(host, (err, mx) => {
     if ((err) || (!mx) || (!mx.some(x => (!!x.exchange)))) {
-      return res.status(500).json({ errors: ['Invalid email address.'] });
+      return res.status(500).json({ error: '"email" must be a valid email.' });
     }
 
     const mail = {
@@ -80,7 +83,7 @@ app.post('/mail', [
 
     transport.sendMail(mail, (err, info) => {
       if (err) {
-        return res.status(500).json({ errors: [err.response] });
+        return res.status(500).json({ error: err.response });
       }
 
       res.json({ success: true });
