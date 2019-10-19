@@ -62,7 +62,7 @@ app.post('/mail', (req, res) => {
   }
 
   const { name, email, subject, message } = req.body;
-  const sent = (new Date()).toGMTString();
+  const date = (new Date()).toGMTString();
   const agent = req.headers['user-agent'];
   const ip = ipaddr(req);
 
@@ -77,8 +77,8 @@ app.post('/mail', (req, res) => {
       from, to,
       replyTo: email,
       subject: subject,
-      text: dots.text({ name, email, subject, message: message, sent, agent, ip }),
-      html: dots.html({ name, email, subject, message: html(message), sent, agent, ip })
+      text: dots.text({ name, email, subject, message: message, date, agent, ip }),
+      html: dots.html({ name, email, subject, message: html(message), date, agent, ip })
     };
 
     transport.sendMail(mail, (err, info) => {
