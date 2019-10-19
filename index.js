@@ -4,7 +4,6 @@ const fs = require('fs'),
       nodemailer = require('nodemailer'),
       dns = require('dns'),
       cors = require('cors'),
-      bodyParser = require('body-parser'),
       rateLimit = require('express-rate-limit');
       Joi = require('@hapi/joi'),
       dot = require('dot');
@@ -28,7 +27,7 @@ const transport = nodemailer.createTransport(process.env.SMTP);
 const dots = dot.process({ path: "./views"});
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors({
   origin: (origin, callback) => {
     if (origins.indexOf(origin) !== -1) {
