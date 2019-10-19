@@ -38,7 +38,12 @@ app.listen(8080, function () {
 });
 ```
 
-# License
+## Deploy on Heroku
+
+The button below will deploy this application to Heroku. You will be guided to fill in the configuration variables this application needs to function correctly.
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+## License
 
 MIT
 
