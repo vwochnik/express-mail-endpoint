@@ -3,11 +3,23 @@
   "version": "0.0.1",
   "description": "",
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "start": "node index.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Vincent Wochnik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vwochnik/express-mail-endpoint.git"
+  },
+  "keywords": [
+    "express",
+    "email",
+    "mail"
+  ],
   "dependencies": {
     "@hapi/joi": "^16.1.7",
     "cors": "^2.8.5",
