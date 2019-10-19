@@ -23,13 +23,6 @@ const endpoint = mailEndpoint({
   viewPath: './views'
 });
 
-endpoint.verify(function(err) {
-  if (err) {
-    process.stdout.write("Could not verify SMTP server.\n");
-    process.exit(1);
-  }
-});
-
 app.use('/mail', express.json());
 app.post('/mail', endpoint);
 
