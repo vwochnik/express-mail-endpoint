@@ -17,7 +17,7 @@ const express = require('express'),
 const app = express();
 
 const endpoint = mailEndpoint({
-  smtp: 'smtps://username:password@smtp-server.com',
+  transport: 'smtps://username:password@smtp-server.com',
   from: 'noreply@example.com',
   to: 'exapmle@example.com',
   viewPath: './views'

@@ -1,6 +1,7 @@
 const express = require('express'),
       cors = require('cors'),
-      rateLimit = require('express-rate-limit');
+      rateLimit = require('express-rate-limit'),
+      nodemailer = require('nodemailer'),
       mailEndpoint = require('./lib');
 
 const smtp = process.env.SMTP,
@@ -21,9 +22,10 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-const endpoint = mailEndpoint({ smtp, from, to, viewPath: './views' });
+const transport = nodemailer.createTransport(smtp),
+      endpoint = mailEndpoint({ transport, from, to, viewPath: './views' });
 
-endpoint.verify(function(err) {
+transport.verify(function(err) {
   if (err) {
     process.stdout.write("Could not verify SMTP server.\n");
     process.exit(1);
@@ -35,5 +37,5 @@ app.use('/mail', rateLimit({ windowMs: 3600000, max: 5, message: { error: 'Too m
 app.post('/mail', endpoint);
 
 app.listen(port, function () {
-  console.log('App listening on port 8080!');
+  console.log(`App listening on port ${port}!`);
 });
