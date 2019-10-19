@@ -30,6 +30,27 @@ app.listen(8080, function () {
   console.log('App listening on port 8080!');
 });
 ```
+## `/mail` endpoint
+
+```
+POST /mail HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+{
+  "name": "John Doe",
+  "email": "john@doe.com",
+  "subject": "Inquiry",
+  "message": "This is a test message."
+}
+
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "success": true
+}
+```
+
+
 ## Configuration
 
 The `mailEndpoint()` function expects a configuration object as its first argument. The following options are available:
@@ -49,6 +70,20 @@ The `to` property is an email address where all submissions are going to be sent
 ### `viewPath`
 
 The `viewPath` property is a directory path pointing to a directory which contains the `html.dot` and `text.dot` doT.js templates.
+
+## Templating
+
+This endpoint requires two doT.js templates, `html.dot` and `text.dot`, which must be inside the `viewPath` option.
+
+The following placeholders are available:
+
+* `{{=it.name}}`
+* `{{=it.email}}`
+* `{{=it.subject}}`
+* `{{=it.date}}`
+* `{{=it.agent}}`
+* `{{=it.ip}}`
+* `{{=it.message}}`
 
 ## Deploy on Heroku
 
