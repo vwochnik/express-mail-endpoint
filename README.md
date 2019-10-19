@@ -88,6 +88,7 @@ The following placeholders are available:
 ## Deploy on Heroku
 
 The button below will deploy this application to Heroku. You will be guided to fill in the configuration variables this application needs to function correctly. The deployed app exposes the `/mail` endpoint.
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## License
