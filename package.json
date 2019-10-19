@@ -1,8 +1,8 @@
 {
-  "name": "mock-server",
-  "version": "1.0.0",
+  "name": "express-mail-endpoint",
+  "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "start": "node index.js"
   },
