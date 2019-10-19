@@ -1,0 +1,24 @@
+{
+  "name": "express-mail-endpoint",
+  "description": "A simple mail endpoint for your express.js app",
+  "repository": "https://github.com/vwochnik/express-mail-endpoint",
+  "keywords": ["node", "express", "email"],
+  "env": {
+    "SMTP": {
+      "description": "The SMTP server URL passed to nodemailer.",
+      "value": "smtps://username:password@smtp-server.com"
+    },
+    "FROM_EMAIL": {
+      "description": "The sender email address.",
+      "value": "noreply@example.com"
+    },
+    "TO_EMAIL": {
+      "description": "The recipient email address.",
+      "value": "info@example.com"
+    },
+    "CORS": {
+      "description": "A comma-separated list of origins.",
+      "value": "https://example.com,http://localhost:8080"
+    }
+  }
+}
